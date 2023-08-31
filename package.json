@@ -1,0 +1,18 @@
+{
+  "name": "supaweek-day-2",
+  "version": "1.0.0",
+  "author": "",
+  "copyright": "",
+  "scripts": {
+    "dev": "zup dev",
+    "test": "zup test"
+  },
+  "dependencies": {
+    "zuplo": "^1.20230828.2353"
+  },
+  "devDependencies": {
+    "@supabase/supabase-js": "^2.33.1",
+    "ai": "^2.2.10",
+    "openai": "^4.3.1"
+  }
+}

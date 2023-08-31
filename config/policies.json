@@ -1,0 +1,50 @@
+{
+  "policies": [
+    {
+      "handler": {
+        "export": "SetHeadersInboundPolicy",
+        "module": "$import(@zuplo/runtime)",
+        "options": {
+          "headers": [
+            {
+              "name": "apikey",
+              "value": "$env(SUPABASE_SERVICE_ROLE_KEY)",
+              "overwrite": true
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer $env(SUPABASE_SERVICE_ROLE_KEY)",
+              "overwrite": true
+            }
+          ]
+        }
+      },
+      "name": "set-headers-inbound",
+      "policyType": "set-headers-inbound"
+    },
+    {
+      "handler": {
+        "export": "ApiKeyInboundPolicy",
+        "module": "$import(@zuplo/runtime)",
+        "options": {
+          "allowUnauthenticatedRequests": false
+        }
+      },
+      "name": "api-key-inbound",
+      "policyType": "api-key-inbound"
+    },
+    {
+      "handler": {
+        "export": "RateLimitInboundPolicy",
+        "module": "$import(@zuplo/runtime)",
+        "options": {
+          "rateLimitBy": "ip",
+          "requestsAllowed": 10,
+          "timeWindowMinutes": 5
+        }
+      },
+      "name": "rate-limit-inbound",
+      "policyType": "rate-limit-inbound"
+    }
+  ]
+}
