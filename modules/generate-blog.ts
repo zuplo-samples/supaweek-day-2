@@ -14,6 +14,12 @@ const functions: CompletionCreateParams.Function[] = [
 ];
 
 export default async function (request: ZuploRequest, context: ZuploContext) {
+  const { orgId } = request.user?.data;
+
+  if (!orgId) {
+    return new Response("Unauthorized", { status: 401 });
+  }
+
   const { topic } = await request.json();
 
   const response = await openai.chat.completions.create({
@@ -32,7 +38,7 @@ export default async function (request: ZuploRequest, context: ZuploContext) {
     // this is so we don't block the response from being sent to the client
     // while we save the blog to the database
     onCompletion: async (completion) => {
-      await saveBlogtoDatabase(completion, context.log);
+      await saveBlogtoDatabase(completion, orgId, context.log);
     },
   });
 
@@ -48,6 +54,7 @@ type FunctionResponse = {
 
 const saveBlogtoDatabase = async (
   blog: string,
+  orgId: string,
   logger: Logger
 ): Promise<"success" | null> => {
   try {
@@ -57,7 +64,9 @@ const saveBlogtoDatabase = async (
       functionResponse.function_call.arguments
     );
 
-    const { error } = await supabase.from("blogs").insert({ content, title });
+    const { error } = await supabase
+      .from("blogs")
+      .insert({ content, title, orgId });
 
     if (error) {
       logger.error(error);
