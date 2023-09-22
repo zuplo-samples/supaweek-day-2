@@ -14,9 +14,15 @@ const functions: CompletionCreateParams.Function[] = [
 ];
 
 export default async function (request: ZuploRequest, context: ZuploContext) {
+  // When using the `api-key-inbound` policy (or any auth policy)
+  // Zuplo automatically adds the user's metadata to the request object
+  // so we can use it to get the orgId
   const { orgId } = request.user?.data;
 
   if (!orgId) {
+    // This will block the further execution of the request
+    // and return a 401 response to the client and it will not hit
+    // any other policies or the handler
     return new Response("Unauthorized", { status: 401 });
   }
 
@@ -38,7 +44,7 @@ export default async function (request: ZuploRequest, context: ZuploContext) {
     // this is so we don't block the response from being sent to the client
     // while we save the blog to the database
     onCompletion: async (completion) => {
-      await saveBlogtoDatabase(completion, orgId, context.log);
+      await saveBlogToDatabase(completion, orgId, context.log);
     },
   });
 
@@ -52,7 +58,7 @@ type FunctionResponse = {
   };
 };
 
-const saveBlogtoDatabase = async (
+const saveBlogToDatabase = async (
   blog: string,
   orgId: string,
   logger: Logger
