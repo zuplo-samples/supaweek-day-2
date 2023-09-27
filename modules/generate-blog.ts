@@ -28,9 +28,8 @@ export default async function (request: ZuploRequest, context: ZuploContext) {
 
   const { topic } = await request.json();
 
-  const response = await openai.chat.completions.create({
+  const chatCompletion = await openai.chat.completions.create({
     model: "gpt-3.5-turbo-0613",
-    stream: true,
     messages: [
       {
         role: "user",
@@ -40,46 +39,44 @@ export default async function (request: ZuploRequest, context: ZuploContext) {
     functions,
   });
 
-  const stream = OpenAIStream(response, {
-    // this is so we don't block the response from being sent to the client
-    // while we save the blog to the database
-    onCompletion: async (completion) => {
-      await saveBlogToDatabase(completion, orgId, context.log);
+  const blogResult = chatCompletion.choices[0].message.function_call!.arguments;
+
+  const savedData = await saveBlogtoDatabase(blogResult, orgId, context.log);
+
+  return new Response(JSON.stringify(savedData), {
+    headers: {
+      "Content-Type": "application/json; charset=utf-8",
     },
   });
-
-  return new StreamingTextResponse(stream);
 }
 
-type FunctionResponse = {
-  function_call: {
-    arguments: string;
-    name: string;
-  };
+type CreatedBlogSchema = {
+  id: number;
+  orgId: number;
+  title: string;
+  content: string;
+  created_at: string;
 };
 
-const saveBlogToDatabase = async (
+const saveBlogtoDatabase = async (
   blog: string,
   orgId: string,
   logger: Logger
-): Promise<"success" | null> => {
+): Promise<CreatedBlogSchema | null> => {
   try {
-    const functionResponse = JSON.parse(blog) as FunctionResponse;
+    const { content, title } = JSON.parse(blog);
 
-    const { content, title } = JSON.parse(
-      functionResponse.function_call.arguments
-    );
-
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from("blogs")
-      .insert({ content, title, orgId });
+      .insert({ content, title, orgId })
+      .select();
 
-    if (error) {
-      logger.error(error);
+    if (error || data === null || data.length === 0) {
+      logger.error(error || "No data returned from database");
       return null;
     }
 
-    return "success";
+    return data[0] as CreatedBlogSchema;
   } catch (err) {
     logger.error(err);
     return null;
