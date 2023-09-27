@@ -37,7 +37,17 @@
                   "type": "array",
                   "items": {
                     "$ref": "../schemas/blog.json"
-                  }
+                  },
+                  "example": [
+                    [
+                      {
+                        "id": "1",
+                        "topic": "The curvature of earth",
+                        "content": "The curvature of earth is a wonder, not a flat topic",
+                        "created_at": "2021-10-10T10:10:10.000Z"
+                      }
+                    ]
+                  ]
                 }
               }
             }
@@ -86,12 +96,9 @@
         "responses": {
           "200": {
             "content": {
-              "text/plain; charset=utf-8": {
+              "application/json": {
                 "schema": {
-                  "type": "string",
-                  "examples": [
-                    "{\n  \"function_call\": {\n    \"arguments\": \"{\\n  \\\"content\\\": \\\"API keys are an essential component of modern web development. They are used to authenticate and authorize access to APIs, allowing developers to securely interact with various services and retrieve data. In this blog post, we will explore the importance of API keys, how they work, best practices for managing them, and potential security risks. Whether you are a beginner or an experienced developer, this blog post will provide valuable insights and tips for working with API keys.\\\",\\n  \\\"title\\\": \\\"The Importance of API Keys in Web Development\\\"\\n}\",\n    \"name\": \"blogpost\"\n  }\n}"
-                  ]
+                  "$ref": "../schemas/blog.json"
                 }
               }
             }
