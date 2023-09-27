@@ -1,15 +1,14 @@
 import { ZuploContext, ZuploRequest, Logger } from "@zuplo/runtime";
-import { OpenAIStream, StreamingTextResponse } from "ai";
 import { openai } from "./services/openai";
 import { supabase } from "./services/supabase";
 import { CompletionCreateParams } from "openai/resources/chat";
-import blogSchema from "../schemas/blog.json";
+import openaiCreateBlogSchema from "../schemas/openai-create-blog-schema.json";
 
 const functions: CompletionCreateParams.Function[] = [
   {
     name: "blogpost",
     description: "A blog post and title",
-    parameters: blogSchema,
+    parameters: openaiCreateBlogSchema,
   },
 ];
 
